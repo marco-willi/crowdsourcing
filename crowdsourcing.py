@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from __future__ import absolute_import, division, print_function
+
 
 from collections import OrderedDict
 import datetime
@@ -30,6 +30,7 @@ import json
 import os
 
 import numpy as np
+import collections
 
 class CrowdImage(object):
     """ An image to be annotated.
@@ -186,7 +187,7 @@ class CrowdLabel(object):
 
     def copy_into(self, into):
         for attr in dir(self):
-            if (not callable(attr) and not attr.startswith("__") and
+            if (not isinstance(attr, collections.Callable) and not attr.startswith("__") and
                     attr != "image" and attr != "worker"):
                 setattr(into, attr, getattr(self, attr))
 
@@ -254,7 +255,7 @@ class CrowdDataset(object):
     def crowdsource_simple(self, avoid_if_finished=False):
         """ Set the predicted labels to the consensus median.
         """
-        for image in self.images.values():
+        for image in list(self.images.values()):
             image.crowdsource_simple(avoid_if_finished=avoid_if_finished)
 
     def estimate_priors(self, gt_dataset=None):
@@ -293,7 +294,7 @@ class CrowdDataset(object):
             self.initialize_parameters(avoid_if_finished=avoid_if_finished)
 
             # Get updated image labels
-            for image in self.images.values():
+            for image in list(self.images.values()):
                 image.predict_true_labels(avoid_if_finished=avoid_if_finished)
 
             # Get CrowdLabels from the computer vision system
@@ -309,7 +310,7 @@ class CrowdDataset(object):
         # Maximum likelihood estimation
         log_likelihood = -np.inf
         old_likelihood = -np.inf
-        for it in xrange(max_iters):
+        for it in range(max_iters):
 
             if self.debug > 1:
                 print("Estimate params for " + self.name + ", iter " +
@@ -317,23 +318,23 @@ class CrowdDataset(object):
 
             # Estimate label predictions in each image using worker labels and
             # current worker parameters
-            for image in self.images.values():
+            for image in list(self.images.values()):
                 image.predict_true_labels(avoid_if_finished=avoid_if_finished)
 
             # Estimate difficulty parameters for each image
             if self.learn_image_params:
-                for image in self.images.values():
+                for image in list(self.images.values()):
                     image.estimate_parameters(
                         avoid_if_finished=avoid_if_finished)
 
             # Estimate skill parameters for each worker
             if self.learn_worker_params:
-                for worker in self.workers.values():
+                for worker in list(self.workers.values()):
                     worker.estimate_parameters(avoid_if_finished=avoid_if_finished)
 
             # Estimate response probability parameters for each worker
-            for image in self.images.values():
-                for label in image.z.values():
+            for image in list(self.images.values()):
+                for label in list(image.z.values()):
                     label.estimate_parameters()
 
             # Check the new log likelihood of the dataset and finish on
@@ -441,7 +442,7 @@ class CrowdDataset(object):
         image is finished.
         """
         finished = {}
-        for image_id, image in self.images.iteritems():
+        for image_id, image in self.images.items():
             finished[image_id] = image.check_finished(
                 set_finished=set_finished)
         return finished
@@ -455,7 +456,7 @@ class CrowdDataset(object):
         """
 
         num = 0
-        for image_id, image in self.images.iteritems():
+        for image_id, image in self.images.items():
 
             if image.z is None:
                 continue
@@ -491,7 +492,7 @@ class CrowdDataset(object):
         """
 
         num = 0
-        for image in self.images.values():
+        for image in list(self.images.values()):
             num += image.num_annotations()
         return num
 
@@ -502,7 +503,7 @@ class CrowdDataset(object):
             return 0
 
         r = 0.
-        for image in self.images.values():
+        for image in list(self.images.values()):
             r += image.risk
         return r / len(self.images)
 
@@ -512,14 +513,14 @@ class CrowdDataset(object):
         """
 
         if sort_method == "num_annos":
-            queue = sorted(self.images.items(), key=lambda x: len(x[1].z))
+            queue = sorted(list(self.images.items()), key=lambda x: len(x[1].z))
         elif sort_method == "risk":
             def risk_func(image):
                 if hasattr(image, "risk"):
                     return -image.risk
                 else:
                     return len(image.z)
-            queue = sorted(self.images.items(),
+            queue = sorted(list(self.images.items()),
                            key=lambda x: risk_func(x[1]))
         elif sort_method == "normalized_risk":
             def norm_risk_func(image):
@@ -527,11 +528,11 @@ class CrowdDataset(object):
                     return -image.risk / len(image.z)
                 else:
                     return len(image.z)
-            queue = sorted(self.images.items(),
+            queue = sorted(list(self.images.items()),
                            key=lambda x: norm_risk_func(x[1])
                           )
         else:
-            queue = full_dataset.images.items()
+            queue = list(full_dataset.images.items())
 
         image_ids = []
         for iq in queue:
@@ -546,7 +547,7 @@ class CrowdDataset(object):
 
         err = 0.
         num_images = 0
-        for image_id, gt_image in gt_dataset.images.iteritems():
+        for image_id, gt_image in gt_dataset.images.items():
 
             image = self.images[image_id]
 

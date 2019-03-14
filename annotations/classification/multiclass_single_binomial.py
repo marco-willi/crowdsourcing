@@ -23,7 +23,7 @@ SOFTWARE.
 """
 # pylint: disable=line-too-long
 
-from __future__ import absolute_import, division, print_function
+
 
 from collections import Counter
 import math
@@ -220,7 +220,7 @@ class CrowdDatasetMulticlassSingleBinomial(CrowdDataset):
                     z_level = z_node.level
 
                     # Update the counts for each layer of the taxonomy.
-                    for l in xrange(0, y_level):
+                    for l in range(0, y_level):
 
                         # Get the ancestor at level `l` and the child at `l+1`
                         # for the image label
@@ -254,8 +254,8 @@ class CrowdDatasetMulticlassSingleBinomial(CrowdDataset):
                 node.data['prob_correct'] = np.clip(prob_correct_num / prob_correct_denom, a_min=0.00000001, a_max=0.99999)
 
         # Class probabilities (leaf node probabilities)
-        num_images = float(np.sum(class_dist.values()))
-        for y, count in class_dist.iteritems():
+        num_images = float(np.sum(list(class_dist.values())))
+        for y, count in class_dist.items():
             num = self.class_probs_prior[y] * self.class_probs_prior_beta + count
             denom = self.class_probs_prior_beta + num_images
             self.class_probs[y] = np.clip(num / denom, a_min=0.00000001, a_max=0.999999)
@@ -274,15 +274,15 @@ class CrowdDatasetMulticlassSingleBinomial(CrowdDataset):
             prob_trust_num = self.prob_trust_prior_beta * self.prob_trust_prior
             prob_trust_denom = self.prob_trust_prior_beta
 
-            for worker_id, worker in self.workers.iteritems():
-                for image in worker.images.values():
+            for worker_id, worker in self.workers.items():
+                for image in list(worker.images.values()):
 
                     if self.recursive_trust:
                         # Only dependent on the imediately previous value
-                        worker_t = image.z.keys().index(worker_id)
+                        worker_t = list(image.z.keys()).index(worker_id)
                         if worker_t > 0:
                             worker_label = image.z[worker_id].label
-                            prev_anno = image.z.values()[worker_t - 1]
+                            prev_anno = list(image.z.values())[worker_t - 1]
 
                             prob_trust_denom += 1.
                             if worker_label == prev_anno.label:
@@ -291,7 +291,7 @@ class CrowdDatasetMulticlassSingleBinomial(CrowdDataset):
                         # Assume all of the previous labels are treated
                         # independently
                         worker_label = image.z[worker_id].label
-                        for prev_worker_id, prev_anno in image.z.iteritems():
+                        for prev_worker_id, prev_anno in image.z.items():
                             if prev_worker_id == worker_id:
                                 break
                             if not prev_anno.is_computer_vision() or self.naive_computer_vision:
@@ -305,7 +305,7 @@ class CrowdDatasetMulticlassSingleBinomial(CrowdDataset):
         """Pass on the dataset-wide worker skill priors to the workers.
         """
 
-        for worker in self.workers.values():
+        for worker in list(self.workers.values()):
             if avoid_if_finished and worker.finished:
                 continue
 
@@ -355,8 +355,8 @@ class CrowdImageMulticlassSingleBinomial(CrowdImage):
             return
 
         taxonomy = self.params.taxonomy
-        votes = Counter([anno.label for anno in self.z.values()
-                         if taxonomy.nodes[anno.label].is_leaf]).items()
+        votes = list(Counter([anno.label for anno in list(self.z.values())
+                         if taxonomy.nodes[anno.label].is_leaf]).items())
         if len(votes) > 0:
             votes.sort(key=lambda x: x[1])
             votes.reverse()
@@ -402,7 +402,7 @@ class CrowdImageMulticlassSingleBinomial(CrowdImage):
 
             # Multiply the likelihoods from each layer of the taxonomy.
             likelihoods = np.empty([z_level])
-            for l in xrange(0, z_level):
+            for l in range(0, z_level):
 
                 # Get the ancestor at level `l` and the child at `l+1` for
                 # the worker's prediction
@@ -460,7 +460,7 @@ class CrowdImageMulticlassSingleBinomial(CrowdImage):
         taxonomy = self.params.taxonomy
 
         # Worker indices, most recent to oldest
-        winds = self.z.keys()
+        winds = list(self.z.keys())
         winds.reverse()
         worker_times = np.arange(len(winds))[::-1]
 
@@ -644,7 +644,7 @@ class CrowdWorkerMulticlassSingleBinomial(CrowdWorker):
         our_label_class_prob = self.params.class_probs[our_label]
 
         # probability of the previous annotation given our annotation
-        prev_anno = self.images[image_id].z.values()[t - 1]
+        prev_anno = list(self.images[image_id].z.values())[t - 1]
         prev_label = prev_anno.label
 
         if prev_label == our_label:
@@ -691,7 +691,7 @@ class CrowdWorkerMulticlassSingleBinomial(CrowdWorker):
             if not node.is_leaf:
                 node.data['prob_correct_counts'] = [0, 0]  # num, denom
 
-        for image in self.images.values():
+        for image in list(self.images.values()):
 
             if len(image.z) <= 1:
                 continue
@@ -747,7 +747,7 @@ class CrowdWorkerMulticlassSingleBinomial(CrowdWorker):
 
         # Placeholder for skills
         total_num_correct = 0.
-        for image in self.images.values():
+        for image in list(self.images.values()):
             y = image.y.label
             z = image.z[self.id].label
             if y == z:
@@ -763,15 +763,15 @@ class CrowdWorkerMulticlassSingleBinomial(CrowdWorker):
             prob_trust_num = self.params.prob_trust_beta * self.params.prob_trust
             prob_trust_denom = self.params.prob_trust_beta
 
-            for image in self.images.values():
+            for image in list(self.images.values()):
 
                 if self.params.recursive_trust:
                     # We are only dependent on the annotation immediately
                     # before us.
-                    our_t = image.z.keys().index(self.id)
+                    our_t = list(image.z.keys()).index(self.id)
                     if our_t > 0:
                         our_label = image.z[self.id].label
-                        prev_anno = image.z.values()[our_t - 1]
+                        prev_anno = list(image.z.values())[our_t - 1]
 
                         prob_trust_denom += 1.
                         if our_label == prev_anno.label:
@@ -779,7 +779,7 @@ class CrowdWorkerMulticlassSingleBinomial(CrowdWorker):
                 else:
                     # We treat each previous label independently
                     our_label = image.z[self.id].label
-                    for prev_worker_id, prev_anno in image.z.iteritems():
+                    for prev_worker_id, prev_anno in image.z.items():
                         if prev_worker_id == self.id:
                             break
                         if not prev_anno.is_computer_vision() or self.params.naive_computer_vision:
@@ -833,7 +833,7 @@ class CrowdLabelMulticlassSingleBinomial(CrowdLabel):
 
         # Sum the likelihoods from each layer of the taxonomy for the user
         # providing this annotation
-        for l in xrange(0, z_level):
+        for l in range(0, z_level):
 
             # Get the child at `l+1` for the worker's prediction
             if l + 1 == z_level:
@@ -878,14 +878,14 @@ class CrowdLabelMulticlassSingleBinomial(CrowdLabel):
             # Agreement with the previous worker annotations
             if self.worker.params.recursive_trust:
                 # Recursive computation
-                t = self.image.z.keys().index(self.worker.id)
+                t = list(self.image.z.keys()).index(self.worker.id)
                 p = self.worker.compute_prob_of_previous_annotations(self.image.id, z, t, compute_denom=False)
                 ll += math.log(p)
             else:
                 # Assume previous labels are treated independently
                 prob_z = self.image.params.class_probs[z]
                 our_worker_id = self.worker.id
-                for worker_id, prev_anno in self.image.z.iteritems():
+                for worker_id, prev_anno in self.image.z.items():
                     if worker_id == our_worker_id:
                         break
                     if not prev_anno.is_computer_vision() or self.image.params.naive_computer_vision:

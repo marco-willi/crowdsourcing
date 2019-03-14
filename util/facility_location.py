@@ -115,7 +115,7 @@ class FacilityLocation():
         # If it happens that some cities are still not connected, then open up more facilities.
         while len(self.city_facilities) < len(self.allCities):
             if debug > 0:
-                print "Opening facility because some cities were unconnected"
+                print("Opening facility because some cities were unconnected")
             alpha = self.fac_open_candidates[self.fac_open_candidates.smallest()]
             self.open_facility(self.fac_open_candidates.pop_smallest(), alpha, debug)
 
@@ -137,7 +137,7 @@ class FacilityLocation():
 
                 # Offer city as a candidate connection to facility
                 if debug > 0:
-                    print "Offer city " + str(city) + " to facility " + str(facility) + " at cost " + str(cost)
+                    print("Offer city " + str(city) + " to facility " + str(facility) + " at cost " + str(cost))
 
                 if facility not in self.facility_offers:
                     # Initialize the offer
@@ -164,7 +164,7 @@ class FacilityLocation():
 
                     # Connect city to existing facility. This is the closest open facility
                     if debug > 0:
-                        print "Connect city " + str(city) + " to existing facility " + str(facility) + " at cost " + str(cost)
+                        print("Connect city " + str(city) + " to existing facility " + str(facility) + " at cost " + str(cost))
                     self.connect(facility, city, debug)
 
                 # Is this facility unopened? Then lets update the contributions for opening it
@@ -194,14 +194,14 @@ class FacilityLocation():
                                     self.facility_disallowed_cities[facility][c2] = [0,0]
                                 self.facility_disallowed_cities[facility][c2][0] += 1
                                 if debug > 0:
-                                    print "  offer " + str(city) + " disallow " + str(c2) + " from " + str(facility) + " count=" + str(self.facility_disallowed_cities[facility][c2][0])
+                                    print("  offer " + str(city) + " disallow " + str(c2) + " from " + str(facility) + " count=" + str(self.facility_disallowed_cities[facility][c2][0]))
 
         # Has a previous city disallowed this connection?
         elif (facility in self.facility_disallowed_cities and
               city in self.facility_disallowed_cities[facility] and
               self.facility_disallowed_cities[facility][city][0] > 0):
             if debug > 0:
-                print "disallowed offer city " + str(city) + " to facility " + str(facility) + " at cost " + str(cost)
+                print("disallowed offer city " + str(city) + " to facility " + str(facility) + " at cost " + str(cost))
             # Store the cost of not being able to connect this city to the factory because some
             # other disallowd neighbor is already connected. If that neighbor removes their offer
             # to the facility, then we'll use this cost to make an offer
@@ -217,7 +217,7 @@ class FacilityLocation():
         self.total_cost += self.openFacilityCosts[facility]
 
         if debug > 0:
-            print "Open facility " + str(facility) + " at alpha " + str(alpha) + ":"
+            print("Open facility " + str(facility) + " at alpha " + str(alpha) + ":")
 
         offers = [c for c in self.fac_city_offers[facility]]
         for c in self.fac_city_offers[facility]:
@@ -236,7 +236,7 @@ class FacilityLocation():
         # Get the offer that the city made to the facility.
         c_ip_j = self.fac_city_offers[facility][c]
         if debug > 0:
-            print "  connect city " + str(c) + " to facility " + str(facility) + " at cost " + str(c_ip_j)
+            print("  connect city " + str(c) + " to facility " + str(facility) + " at cost " + str(c_ip_j))
 
         # This city should not be in the disallowed cities for this facility
         if c in self.facility_disallowed_cities[facility] and self.facility_disallowed_cities[facility][c][0] > 0:
@@ -254,7 +254,7 @@ class FacilityLocation():
             f = self.city_facilities[c]
             self.total_cost -= self.facility_cities[f][c]
             if debug > 0:
-                print "    requires switch from facility " + str(f) + " at cost " + str(self.facility_cities[f][c])
+                print("    requires switch from facility " + str(f) + " at cost " + str(self.facility_cities[f][c]))
             del self.facility_cities[f][c]
             del self.city_facilities[c]
 
@@ -287,7 +287,7 @@ class FacilityLocation():
                     c not in self.facility_disallowed_cities[f] or
                     self.facility_disallowed_cities[f][c][0] <= 0):
                     if debug > 0:
-                        print "    offer switch from facility " + str(facility) + "("+str(c_ip_j)+ ") to " + str(f) + "(" + str(c_i_j)+") for city " + str(c)
+                        print("    offer switch from facility " + str(facility) + "("+str(c_ip_j)+ ") to " + str(f) + "(" + str(c_i_j)+") for city " + str(c))
                     t[1] += c_ip_j-c_i_j  # sum offers to switch connections of already connected cities to f
                     t[3] += 1             # number of offers to switch connections of already connected cities to f
                     self.city_fac_offers[c][f] = (c_i_j,f,c_i_j-c_ip_j)
@@ -301,7 +301,7 @@ class FacilityLocation():
                                     self.facility_disallowed_cities[f][c2] = [0,0]
                                 self.facility_disallowed_cities[f][c2][0] += 1
                                 if debug > 0:
-                                    print "  offer switch " + str(c) + " disallow " + str(c2) + " from " + str(f) + " count=" + str(self.facility_disallowed_cities[f][c2][0])
+                                    print("  offer switch " + str(c) + " disallow " + str(c2) + " from " + str(f) + " count=" + str(self.facility_disallowed_cities[f][c2][0]))
             else:
                 # This city won't ever be matched to this facility
                 bad.append(f)
@@ -317,7 +317,7 @@ class FacilityLocation():
                             # And is this city not already connected?
                             if self.facility_disallowed_cities[f][c2][0] == 0 and self.facility_disallowed_cities[f][c2][1] != 0 and c2 not in self.city_facilities:
                                 if debug > 0:
-                                    print "  undisallow " + str(c2) + " from " + str(f) + " ( "+str(c)+" was connected) cost=" + str(self.facility_disallowed_cities[f][c2][1])
+                                    print("  undisallow " + str(c2) + " from " + str(f) + " ( "+str(c)+" was connected) cost=" + str(self.facility_disallowed_cities[f][c2][1]))
                                 self.offer(c2, f, self.facility_disallowed_cities[f][c2][1], debug)
 
             # If this facility is not open, then update the alpha value that will open it.
@@ -342,13 +342,13 @@ class FacilityLocation():
         self.costs_s = None
 
     def debug_offers(self):
-        print ""
-        print "--facility_cities " + str(self.facility_cities)
-        print "--city_facilities " + str(self.city_facilities)
-        print "--fac_open_candidates " + str(self.fac_open_candidates)
-        print "--fac_city_offers " + str(self.fac_city_offers)
-        print "--city_fac_offers " + str(self.city_fac_offers)
-        print "--facility_offers " + str(self.facility_offers)
+        print("")
+        print("--facility_cities " + str(self.facility_cities))
+        print("--city_facilities " + str(self.city_facilities))
+        print("--fac_open_candidates " + str(self.fac_open_candidates))
+        print("--fac_city_offers " + str(self.fac_city_offers))
+        print("--city_fac_offers " + str(self.city_fac_offers))
+        print("--facility_offers " + str(self.facility_offers))
 
 # Taken from http://code.activestate.com/recipes/522995-priority-dict-a-priority-queue-with-updatable-prio/
 import heapq
@@ -372,7 +372,7 @@ class priority_dict(dict):
         self._rebuild_heap()
 
     def _rebuild_heap(self):
-        self._heap = [(v, k) for k, v in self.iteritems()]
+        self._heap = [(v, k) for k, v in self.items()]
         heapq.heapify(self._heap)
 
     def smallest(self):

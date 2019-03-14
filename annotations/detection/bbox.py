@@ -89,12 +89,12 @@ class CrowdDatasetBBox(CrowdDataset):
     def set_true_labels(self, images):
         """ Copy the labels from `images` to `self.images`
         """
-        for image_id, image in self.images.iteritems():
+        for image_id, image in self.images.items():
             if images[image_id].y is not None:
                 if image.y is None:
                     image.y = CrowdLabelBBox(image, None)
                 images[image_id].y.copy_into(image.y)
-                for worker_id, anno in image.z.iteritems():
+                for worker_id, anno in image.z.items():
                     anno.match_to(image.y)
 
     def estimate_priors(self, thresh=.5, use_gt=False):
@@ -152,24 +152,24 @@ class CrowdDatasetBBox(CrowdDataset):
 
     def initialize_parameters(self, avoid_if_finished=False):
         # Initialize worker responses probabilities to the global priors
-        for worker_id, worker in self.workers.iteritems():
+        for worker_id, worker in self.workers.items():
             worker.prob_fp = self.prob_fp
             worker.prob_fn = self.prob_fn
             worker.sigma = self.prior_sigma
 
         # Initialize image difficulties to the global priors
-        for image_id, image in self.images.iteritems():
+        for image_id, image in self.images.items():
             if avoid_if_finished and image.finished:
                 continue
             if image.y is not None and image.y.bboxes is not None:
                 image.sigmas = [self.prior_sigma for b in image.y.bboxes]
 
         # Initialize image specific parameters
-        for image_id, image in self.images.iteritems():
+        for image_id, image in self.images.items():
             if avoid_if_finished and image.finished:
                 continue
             if image.y is not None and image.y.bboxes is not None:
-                for worker_id, anno in image.z.iteritems():
+                for worker_id, anno in image.z.items():
                     anno.prob_fn = self.prob_fn
                     for b in anno.bboxes:
                         b.sigma = self.prior_sigma
@@ -200,7 +200,7 @@ class CrowdDatasetBBox(CrowdDataset):
         """
         # create a random permutation of the image ids
         images = [i for i in self.images]
-        images = [images[i] for i in np.random.permutation(range(len(images)))]
+        images = [images[i] for i in np.random.permutation(list(range(len(images))))]
 
         boxes = []
         num_total = 0
@@ -209,7 +209,7 @@ class CrowdDatasetBBox(CrowdDataset):
             image = self.images[image_id]
             num += 1
             if image.z is not None:
-                for worker_id, anno in image.z.iteritems():
+                for worker_id, anno in image.z.items():
                     if not anno.is_computer_vision():
                         num_total += 1
                         for b in anno.bboxes:
@@ -529,7 +529,7 @@ class CrowdImageBBox(CrowdImage):
         # Sigmas for the boxes
         s = [0] * len(self.y.bboxes)
 
-        for worker_id, anno in self.z.iteritems():
+        for worker_id, anno in self.z.items():
             matches = [None for i in range(len(self.y.bboxes))]
             for b in anno.bboxes:
                 if b.a is not None:
@@ -706,7 +706,7 @@ class CrowdLabelBBox(CrowdLabel):
         for b in self.bboxes:
             if not b.a is None:
                 if b.a in matches:
-                    print 'COLORIZE: Multiple boxes matched to the same ground truth, image=' + str(self.image.id) + ", worker=" + str(self.worker.id if self.worker else 'null') + ", a=" + str(b.a) + " " + str(self.encode())
+                    print('COLORIZE: Multiple boxes matched to the same ground truth, image=' + str(self.image.id) + ", worker=" + str(self.worker.id if self.worker else 'null') + ", a=" + str(b.a) + " " + str(self.encode()))
                     b.a = None
                 else:
                     matches[b.a] = b

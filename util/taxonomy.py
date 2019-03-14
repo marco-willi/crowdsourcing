@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from __future__ import absolute_import, division, print_function
+
 from collections import OrderedDict
 
 import numpy as np
@@ -80,7 +80,7 @@ class Node(object):
         """ jsonify our data, specifically handling numpy arrays.
         """
         json_data = {}
-        for key, value in self.data.iteritems():
+        for key, value in self.data.items():
             if isinstance(value, np.ndarray):
                 value = value.tolist()
             json_data[key] = value
@@ -206,7 +206,7 @@ class Taxonomy(object):
             while len(queue):
                 node = queue.pop(0)
                 if not node.is_leaf:
-                    queue += node.children.values()
+                    queue += list(node.children.values())
                 nodes.append(node)
             self._breadth_first_traversal = nodes
         return nodes

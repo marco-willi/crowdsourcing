@@ -389,7 +389,7 @@ class CrowdWorkerBinaryClassification(CrowdWorker):
 
         num_times_worker_said_present = 0.
 
-        for image_id, image in self.images.items():
+        for image_id, image in list(self.images.items()):
             # Get the current predicted label for the image
             y = image.y.label
             if hasattr(image.y, 'soft_label'):
