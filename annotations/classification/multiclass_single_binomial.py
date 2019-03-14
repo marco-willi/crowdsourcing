@@ -275,7 +275,7 @@ class CrowdDatasetMulticlassSingleBinomial(CrowdDataset):
             prob_trust_denom = self.prob_trust_prior_beta
 
             for worker_id, worker in self.workers.iteritems():
-                for image in worker.images.itervalues():
+                for image in worker.images.values():
 
                     if self.recursive_trust:
                         # Only dependent on the imediately previous value
@@ -305,7 +305,7 @@ class CrowdDatasetMulticlassSingleBinomial(CrowdDataset):
         """Pass on the dataset-wide worker skill priors to the workers.
         """
 
-        for worker in self.workers.itervalues():
+        for worker in self.workers.values():
             if avoid_if_finished and worker.finished:
                 continue
 
@@ -691,7 +691,7 @@ class CrowdWorkerMulticlassSingleBinomial(CrowdWorker):
             if not node.is_leaf:
                 node.data['prob_correct_counts'] = [0, 0]  # num, denom
 
-        for image in self.images.itervalues():
+        for image in self.images.values():
 
             if len(image.z) <= 1:
                 continue
@@ -747,7 +747,7 @@ class CrowdWorkerMulticlassSingleBinomial(CrowdWorker):
 
         # Placeholder for skills
         total_num_correct = 0.
-        for image in self.images.itervalues():
+        for image in self.images.values():
             y = image.y.label
             z = image.z[self.id].label
             if y == z:
@@ -763,7 +763,7 @@ class CrowdWorkerMulticlassSingleBinomial(CrowdWorker):
             prob_trust_num = self.params.prob_trust_beta * self.params.prob_trust
             prob_trust_denom = self.params.prob_trust_beta
 
-            for image in self.images.itervalues():
+            for image in self.images.values():
 
                 if self.params.recursive_trust:
                     # We are only dependent on the annotation immediately
